@@ -1,0 +1,24 @@
+<h1>My Profile</h1>
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">Account Information</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            <strong>Name: </strong> {{account.title}} {{account.firstName}} {{account.lastName}}<br />
+            <strong>Email: </strong> {{account.email}}<br />
+            <strong>Role: </strong> 
+            <span class="badge badge-primary">{{account.role}}</span><br />
+            <strong>Status: </strong> 
+            <span *ngIf="account.status === 'Active'" class="badge badge-success">
+                <i class="fas fa-check-circle mr-1"></i> Active
+            </span>
+            <span *ngIf="account.status === 'Inactive'" class="badge badge-danger">
+                <i class="fas fa-times-circle mr-1"></i> Inactive
+            </span>
+        </p>
+        <div class="d-flex justify-content-between">
+            <a routerLink="update" class="btn btn-primary">Update Profile</a>
+        </div>
+    </div>
+</div>

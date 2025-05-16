@@ -1,0 +1,66 @@
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>My Requests</h4>
+            <a routerLink="../add" class="btn btn-primary">New Request</a>
+        </div>
+    </div>
+    <div class="alert alert-info m-3">
+        <span class="badge bg-success me-2">Real-time Updates Active</span>
+        Auto-refreshing every {{pollingInterval/1000}} seconds
+    </div>
+    <div class="d-flex justify-content-end m-3">
+        <button (click)="refreshList()" class="btn btn-outline-primary">
+            <i class="fas fa-sync-alt me-1"></i> Refresh Now
+        </button>
+    </div>
+    <div class="card-body">
+        <div *ngIf="loading" class="text-center">
+            <div class="spinner-border spinner-border-lg align-center"></div>
+        </div>
+        
+        <div *ngIf="!loading && requests.length === 0" class="text-center">
+            <h5>No requests found</h5>
+            <p>Click the "New Request" button above to create a request.</p>
+        </div>
+        
+        <div *ngIf="!loading && requests.length > 0" class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Items</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let request of requests">
+                        <td>{{ request.title }}</td>
+                        <td>{{ request.type }}</td>
+                        <td>{{ request.items?.length || 0 }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="getStatusClass(request.status)">
+                                {{ request.status }}
+                            </span>
+                        </td>
+                        <td>{{ request.created | date:'mediumDate' }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-info" [routerLink]="['../view', request.id]">
+                                    View
+                                </button>
+                                <button class="btn btn-sm btn-warning" *ngIf="request.status === 'Pending'"
+                                        [routerLink]="['../edit', request.id]">
+                                    Edit
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 

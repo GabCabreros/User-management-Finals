@@ -1,0 +1,12 @@
+node_modules/
+.angular/
+dist/
+tmp/
+out-tsc/
+.sass-cache/
+connect.lock
+coverage/
+libpeerconnection.log
+*.log
+.DS_Store
+Thumbs.db 

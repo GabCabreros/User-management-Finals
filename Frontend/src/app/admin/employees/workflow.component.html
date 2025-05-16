@@ -1,0 +1,371 @@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h1 class="mb-0">
+            Employee Workflows
+            <small *ngIf="employee" class="text-muted fs-6 ms-2">
+                {{employee.account?.firstName}} {{employee.account?.lastName}}
+            </small>
+        </h1>
+        <a routerLink="/admin/employees" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Employees
+        </a>
+    </div>
+    
+    <div class="card-body">
+        <!-- Employee Details Section -->
+        <div class="card mb-4" *ngIf="employee">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Employee ID:</strong> {{employee.employeeId}}</p>
+                        <p class="mb-1"><strong>Name:</strong> {{employee.account?.firstName}} {{employee.account?.lastName}}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Position:</strong> {{employee.position}}</p>
+                        <p class="mb-1"><strong>Department:</strong> {{employee.department?.name || 'Not Assigned'}}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Status:</strong> {{employee.status}}</p>
+                        <p class="mb-1"><strong>Hire Date:</strong> {{employee.hireDate | date:'mediumDate'}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div *ngIf="loading" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading workflows...</p>
+        </div>
+        
+        <!-- No Workflows Message -->
+        <div *ngIf="!loading && workflows.length === 0" class="alert alert-info text-center my-4">
+            <i class="fas fa-info-circle fa-2x mb-3"></i>
+            <h5>No Workflows Found</h5>
+            <p>There are no workflows for this employee.</p>
+        </div>
+        
+        <!-- Workflow list - Timeline View -->
+        <div *ngIf="!loading && workflows.length > 0" class="activity-timeline">
+            <div *ngFor="let workflow of paginatedWorkflows" class="activity-item">
+                <div class="activity-icon">
+                    <div class="icon-circle" [ngClass]="workflow.statusClass">
+                        <i class="fas" [ngClass]="workflow.iconClass"></i>
+                    </div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-header">
+                        <div class="activity-title">
+                            <span class="fw-bold">
+                                <span class="activity-type-badge" [ngClass]="workflow.type.toLowerCase().replace(' ', '-')">{{workflow.type}}</span>
+                            </span>
+                            <span class="badge ms-2" [ngClass]="workflow.statusClass">
+                                {{workflow.displayStatus || (workflow.newValue || workflow.status)}}
+                            </span>
+                            <!-- Highlight request status changes -->
+                            <span *ngIf="workflow.type === 'Request' && workflow.previousValue && workflow.newValue" 
+                                  class="ms-2 fw-bold status-change-indicator">
+                                <i class="fas fa-exchange-alt me-1"></i>
+                                Status Changed
+                            </span>
+                        </div>
+                        <div class="activity-time">
+                            {{workflow.displayDate || (workflow.created | date:'MMM d, yyyy, h:mm a')}}
+                        </div>
+                    </div>
+                    
+                    <div class="activity-body">
+                        <p class="mb-2">{{workflow.description}}</p>
+                        
+                        <!-- Enhanced Change details for requests with prominent status indicators -->
+                        <div *ngIf="workflow.previousValue && workflow.newValue" 
+                             class="change-details" 
+                             [ngClass]="{'request-status-change': workflow.type === 'Request'}">
+                            <!-- Special formatting for request status changes from pending to completed/approved/rejected -->
+                            <div *ngIf="workflow.type === 'Request' && isStatusChange(workflow)" class="status-transition-box p-3 mb-2">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="status-transition-label">Request Status Update</span>
+                                </div>
+                                <div class="status-transition">
+                                    <div class="status-from">
+                                        <span class="badge bg-secondary px-3 py-2">
+                                            <i class="fas fa-clock me-1"></i> {{workflow.previousValue}}
+                                        </span>
+                                    </div>
+                                    <div class="status-arrow">
+                                        <i class="fas fa-long-arrow-alt-right"></i>
+                                    </div>
+                                    <div class="status-to">
+                                        <span class="badge px-3 py-2" [ngClass]="getStatusBadgeClass(workflow.newValue)">
+                                            <i [ngClass]="getStatusIcon(workflow.newValue)" class="me-1"></i> {{workflow.newValue}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Standard change display for non-request status changes -->
+                            <div *ngIf="!isStatusChange(workflow)" class="standard-change">
+                                <span class="change-from px-2 py-1 rounded">{{workflow.previousValue}}</span>
+                                <i class="fas fa-arrow-right mx-2"></i>
+                                <span class="change-to px-2 py-1 rounded" [ngClass]="workflow.statusClass">{{workflow.newValue}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-footer">
+                        <div class="d-flex align-items-center">
+                            <!-- View details button -->
+                            <a [routerLink]="['/admin/workflows/details', workflow.id]" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination Controls -->
+        <nav *ngIf="totalPages > 1" aria-label="Workflow pagination" class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                    <a class="page-link" href="javascript:void(0)" (click)="setPage(currentPage - 1)">Previous</a>
+                </li>
+                <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="page === currentPage">
+                    <a class="page-link" href="javascript:void(0)" (click)="setPage(page)">{{page}}</a>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <a class="page-link" href="javascript:void(0)" (click)="setPage(currentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Summary -->
+        <div *ngIf="!loading && workflows.length > 0" class="text-center mt-3 text-muted">
+            <small>Showing {{(currentPage - 1) * itemsPerPage + 1}} to {{Math.min(currentPage * itemsPerPage, workflows.length)}} of {{workflows.length}} workflows</small>
+        </div>
+    </div>
+</div>
+
+<style>
+.activity-timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background-color: #e9ecef;
+    z-index: 0;
+}
+
+.activity-item {
+    display: flex;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.activity-icon {
+    position: relative;
+    z-index: 1;
+    margin-right: 1.25rem;
+}
+
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.activity-content {
+    flex: 1;
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.activity-title {
+    font-weight: 500;
+}
+
+.activity-time {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.activity-body {
+    margin-bottom: 0.75rem;
+}
+
+.activity-footer {
+    display: flex;
+    align-items: center;
+}
+
+.change-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.change-from {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.change-to {
+    background-color: #f8f9fa;
+    color: white;
+}
+
+.activity-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: #e9ecef;
+}
+
+/* Type-specific colors */
+.request {
+    background-color: #cff4fc;
+    color: #055160;
+}
+
+.accountcreation, .profileupdate {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.onboarding {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+
+.department-transfer, .transfer {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.status-change, .statusupdate {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.offboarding, .termination {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.request-status-change {
+    background-color: #fffbde;
+    border-left: 4px solid #ffc107;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.status-change-indicator {
+    color: #fd7e14;
+    font-size: 0.85rem;
+}
+
+/* Specific status colors for request states */
+.change-to.bg-success {
+    background-color: #198754 !important;
+    color: white;
+}
+
+.change-to.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.change-to.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.change-to.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #212529;
+}
+
+.status-transition-box {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #6c757d;
+    margin-bottom: 1rem;
+}
+
+.status-transition-label {
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.status-transition {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.status-arrow {
+    color: #6c757d;
+    font-size: 1.5rem;
+    margin: 0 1rem;
+}
+
+.status-from, .status-to {
+    text-align: center;
+}
+
+/* Status-specific styles */
+.status-transition-box.pending-to-completed {
+    border-left-color: #198754;
+}
+
+.status-transition-box.pending-to-approved {
+    border-left-color: #198754;
+}
+
+.status-transition-box.pending-to-rejected {
+    border-left-color: #dc3545;
+}
+
+/* Badge animations */
+.status-to .badge {
+    animation: pulse-badge 1s ease-in-out;
+}
+
+@keyframes pulse-badge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+</style> 

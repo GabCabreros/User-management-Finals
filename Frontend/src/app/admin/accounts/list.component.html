@@ -1,0 +1,53 @@
+<h1>ACCOUNTS</h1>
+
+<div *ngIf="loading" class="text-center mb-4">
+    <span class="spinner-border spinner-border-lg"></span>
+    <p>Loading accounts...</p>
+</div>
+
+<table class="table table-striped" *ngIf="!loading">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let account of accounts" [ngClass]="{'table-danger': account.status === 'Inactive'}">
+            <td>{{account.title}} {{account.firstName}} {{account.lastName}}</td>
+            <td>{{account.email}}</td>
+            <td>{{account.role}}</td>
+            <td>
+                <!-- Active status -->
+                <span *ngIf="account.status === 'Active'" class="badge badge-success">
+                    <i class="fas fa-check-circle mr-1"></i> Active
+                </span>
+                
+                <!-- Inactive status -->
+                <span *ngIf="account.status === 'Inactive'" class="badge badge-danger">
+                    <i class="fas fa-times-circle mr-1"></i> Inactive
+                </span>
+                
+                <!-- Fallback for unexpected values -->
+                <span *ngIf="account.status !== 'Active' && account.status !== 'Inactive'" class="badge badge-secondary">
+                    {{account.status || 'Unknown'}}
+                </span>
+            </td>
+            <td>
+                <a routerLink="edit/{{account.id}}" class="btn btn-sm btn-primary">Edit</a>
+            </td>
+        </tr>
+        <tr *ngIf="accounts && accounts.length === 0">
+            <td colspan="5" class="text-center">
+                <span>No accounts found</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-between mt-3">
+    <a routerLink="add" class="btn btn-success">Create Account</a>
+</div>

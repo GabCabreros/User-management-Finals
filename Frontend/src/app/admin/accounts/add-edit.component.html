@@ -1,0 +1,118 @@
+<h1 *ngIf="isAddMode">Create Account</h1>
+<h1 *ngIf="!isAddMode">Edit Account</h1>
+
+<div *ngIf="!isAddMode" class="alert" [ngClass]="form.get('status')?.value === 'Active' ? 'alert-success' : 'alert-danger'">
+    <strong>Account Status: {{form.get('status')?.value}}</strong>
+    <p *ngIf="form.get('status')?.value === 'Active'">This account is currently active. You can inactivate it using the status dropdown below.</p>
+    <p *ngIf="form.get('status')?.value === 'Inactive'">This account is currently inactive. You can reactivate it using the status dropdown below.</p>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Title</label>
+            <select formControlName="title" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
+                <option value=""></option>
+                <option value="Mr">Mr</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Miss">Miss</option>
+                <option value="Ms">Ms</option>
+            </select>
+            <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+                <div *ngIf="f.title.errors?.['required']">Title is required</div>
+            </div>
+        </div>
+        <div class="form-group col-5">
+            <label>First Name</label>
+            <input type="text" formControlName="firstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
+            <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
+                <div *ngIf="f.firstName.errors?.['required']">First Name is required</div>
+            </div>
+        </div>
+        <div class="form-group col-5">
+            <label>Last Name</label>
+            <input type="text" formControlName="lastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
+            <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
+                <div *ngIf="f.lastName.errors?.['required']">Last Name is required</div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-7">
+            <label>Email</label>
+            <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
+            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                <div *ngIf="f.email.errors?.['required']">Email is required</div>
+                <div *ngIf="f.email.errors?.['email']">Email must be a valid email address</div>
+            </div>
+        </div>
+        <div class="form-group col">
+            <label>Role</label>
+            <select formControlName="role" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
+                <option value=""></option>
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <div *ngIf="submitted && f.role.errors" class="invalid-feedback">
+                <div *ngIf="f.role.errors?.['required']">Role is required</div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col">
+            <label><strong>Account Status</strong></label>
+            <select formControlName="status" class="form-control form-control-lg" [ngClass]="{ 'is-invalid': submitted && f.status.errors, 'border-success': form.get('status')?.value === 'Active', 'border-danger': form.get('status')?.value === 'Inactive' }">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive (Employee will no longer have access)</option>
+            </select>
+            <small class="form-text text-muted">
+                Change the account status to inactivate or reactivate this employee.
+            </small>
+            <div *ngIf="form.get('status')?.value !== originalStatus" class="alert mt-2" [ngClass]="form.get('status')?.value === 'Active' ? 'alert-success' : 'alert-warning'">
+                <strong *ngIf="form.get('status')?.value === 'Active'">
+                    You are about to ACTIVATE this account. The employee will regain access to the system.
+                </strong>
+                <strong *ngIf="form.get('status')?.value === 'Inactive'">
+                    You are about to DEACTIVATE this account. The employee will lose access to the system.
+                </strong>
+                <p class="mt-2 mb-0">Click Save to confirm this change.</p>
+            </div>
+            <div *ngIf="submitted && f.status.errors" class="invalid-feedback">
+                <div *ngIf="f.status.errors?.['required']">Status is required</div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!isAddMode">
+        <h3 class="pt-3">Change Password</h3>
+        <p>Leave blank to keep the same password</p>
+    </div>
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Password</label>
+            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                <div *ngIf="f.password.errors?.['required']">Password is required</div>
+                <div *ngIf="f.password.errors?.['minlength']">Password must be at least 6 characters</div>
+            </div>
+        </div>
+        <div class="form-group col">
+            <label>Confirm Password</label>
+            <input type="password" formControlName="confirmPassword" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" />
+            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
+                <div *ngIf="f.confirmPassword.errors?.['required']">Confirm Password is required</div>
+                <div *ngIf="f.confirmPassword.errors?.['mustMatch']">Passwords must match</div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <button [disabled]="submitting" class="btn btn-primary">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm mr-1"></span>
+            Save
+        </button>
+        <button *ngIf="!isAddMode" type="button" [disabled]="deleting" (click)="onDelete()" class="btn btn-danger ml-2">
+            <span *ngIf="deleting" class="spinner-border spinner-border-sm mr-1"></span>
+            Delete Account
+        </button>
+        <a routerLink="/admin/accounts" class="btn btn-link">Cancel</a>
+    </div>
+</form>

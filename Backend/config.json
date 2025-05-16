@@ -1,0 +1,20 @@
+{
+    "database": {
+        "host": "153.92.15.31",
+        "port": 3306,
+        "user": "u875409848_cena",
+        "password": "9T2Z5$3UKkgSYzE",
+        "database": "u875409848_cena"
+    },
+    "secret": "5f3c8d2e-9b7a-4f16-8e2d-1c6a9b3d4f5e",
+    "emailFrom": "admin@tester.com",
+    "smtpOptions": {
+        "host": "smtp.ethereal.email",
+        "port": 587,
+        "auth": {
+            "user": "johan.schaefer@ethereal.email",
+            "pass": "m2rqvmVPCwTAjSmzV1"
+        }
+    }
+}
+

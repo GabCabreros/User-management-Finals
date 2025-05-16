@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: user-management-backend
+    env: node
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+  
+  - type: web
+    name: user-management-frontend
+    env: static
+    buildCommand: |
+      cd Frontend
+      npm install
+      npm run build
+    staticPublishPath: dist/user-management-system/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+        spa: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains 

@@ -1,0 +1,79 @@
+<h1>Request Details</h1>
+<div *ngIf="loading" class="spinner-border spinner-border-lg align-center"></div>
+<div *ngIf="request">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">{{request.type}} Request - {{request.status}}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <strong>User:</strong>
+                </div>
+                <div class="col-sm-9">
+                    {{request.account?.firstName}} {{request.account?.lastName}}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <strong>Title:</strong>
+                </div>
+                <div class="col-sm-9">
+                    {{request.title}}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <strong>Description:</strong>
+                </div>
+                <div class="col-sm-9">
+                    {{request.description || 'No description provided'}}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <strong>Created:</strong>
+                </div>
+                <div class="col-sm-9">
+                    {{request.created | date:'medium'}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Request Items</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of request.items">
+                            <td>{{item.name}}</td>
+                            <td>{{item.description || 'No description'}}</td>
+                            <td>{{item.quantity}}</td>
+                            <td>{{item.status}}</td>
+                        </tr>
+                        <tr *ngIf="!request.items || request.items.length === 0">
+                            <td colspan="4" class="text-center">No items in this request</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <a routerLink="/admin/requests" class="btn btn-link">Back to Requests</a>
+        <a routerLink="/admin/requests/edit/{{request.id}}" class="btn btn-primary">Edit</a>
+    </div>
+</div> 

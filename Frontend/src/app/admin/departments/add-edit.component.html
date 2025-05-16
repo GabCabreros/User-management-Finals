@@ -1,0 +1,47 @@
+<div class="card">
+    <div class="card-header">
+        <h1 class="mb-0">{{title}}</h1>
+    </div>
+    <div class="card-body">
+        <!-- Loading spinner -->
+        <div *ngIf="loading" class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading department data...</p>
+        </div>
+        
+        <!-- Department form -->
+        <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+                <label class="form-label">Department Name <span class="text-danger">*</span></label>
+                <input type="text" formControlName="name" class="form-control" 
+                    [ngClass]="{ 'is-invalid': submitted && f.name.errors }" 
+                    placeholder="Enter department name" />
+                <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                    <div *ngIf="f.name.errors.required">Department name is required</div>
+                    <div *ngIf="f.name.errors.minlength">Department name must be at least 2 characters</div>
+                    <div *ngIf="f.name.errors.maxlength">Department name cannot exceed 100 characters</div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea formControlName="description" class="form-control" rows="3" 
+                    placeholder="Enter department description (optional)"></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button [disabled]="submitting" type="submit" class="btn btn-primary">
+                    <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                    <i *ngIf="!submitting" class="fas fa-save me-1"></i>
+                    Save Department
+                </button>
+                <a routerLink="/admin/departments" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div> 

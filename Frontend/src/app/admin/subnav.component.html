@@ -1,0 +1,37 @@
+<nav class="admin-nav navbar navbar-expand navbar-light bg-light">
+    <div class="navbar-nav">
+        <a [routerLink]="['/admin/accounts']" routerLinkActive="active" class="nav-item nav-link">Accounts</a>
+        <a [routerLink]="['/admin/employees']" routerLinkActive="active" class="nav-item nav-link">Employees</a>
+        <a [routerLink]="['/admin/departments']" routerLinkActive="active" class="nav-item nav-link">Departments</a>
+        <a [routerLink]="['/admin/workflows']" routerLinkActive="active" class="nav-item nav-link">Workflows</a>
+        <a [routerLink]="['/admin/requests']" routerLinkActive="active" class="nav-item nav-link">Requests</a>
+    </div>
+</nav>
+
+<style>
+.admin-nav {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nav-link {
+    color: #007bff !important;
+    cursor: pointer;
+    padding: 8px 16px;
+    margin: 0 4px;
+}
+
+.nav-link:hover {
+    color: #0056b3 !important;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}
+
+.nav-link.active {
+    color: #0056b3 !important;
+    font-weight: bold;
+    background-color: rgba(0,123,255,0.1);
+    border-radius: 4px;
+}
+</style>

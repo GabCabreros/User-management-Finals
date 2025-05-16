@@ -1,0 +1,56 @@
+<h3 class="card-header">Login</h3>
+<div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': (submitted && f.email.errors) || errorType === 'email' }" />
+            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                <div *ngIf="f.email.errors?.['required']">Email is required</div>
+                <div *ngIf="f.email.errors?.['email']">Email is invalid</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': (submitted && f.password.errors) || errorType === 'password' }" />
+            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                <div *ngIf="f.password.errors?.['required']">Password is required</div>
+            </div>
+        </div>
+        
+        <!-- Helpful guidance based on error type -->
+        <div *ngIf="errorType === 'verification'" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle mr-1"></i> Your account email needs verification.
+            <hr>
+            <p class="mb-0">Check your email inbox for verification instructions or <a routerLink="../register" class="alert-link">register again</a>.</p>
+        </div>
+        
+        <div *ngIf="errorType === 'inactive'" class="alert alert-danger">
+            <i class="fas fa-ban mr-1"></i> Your account is inactive.
+            <hr>
+            <p class="mb-0">Please contact an administrator to reactivate your account.</p>
+        </div>
+        
+        <div class="form-group">
+            <button [disabled]="loading" class="btn btn-primary">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+                Login
+            </button>
+            <a routerLink="../register" class="btn btn-link">Register</a>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <div *ngIf="errorType === 'email'" class="text-danger">
+                <small>
+                    <i class="fas fa-info-circle mr-1"></i>
+                    New user? <a routerLink="../register" class="alert-link">Register here</a>
+                </small>
+            </div>
+            <div *ngIf="errorType === 'password'" class="text-danger">
+                <small>
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <a routerLink="../forgot-password" class="alert-link">Forgot your password?</a>
+                </small>
+            </div>
+            <a routerLink="../forgot-password" class="btn btn-link pr-0">Forgot Password?</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,261 @@
+<h1>System Activity Details</h1>
+
+<!-- Loading spinner -->
+<div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading activity details...</p>
+</div>
+
+<!-- Activity details -->
+<div *ngIf="!loading && workflow" class="activity-details">
+    <!-- Activity header -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle me-3" [ngClass]="workflow.statusClass">
+                        <i class="fas" [ngClass]="workflow.iconClass"></i>
+                    </div>
+            <div>
+                        <h5 class="mb-0">
+                            <span class="activity-type-badge" [ngClass]="workflow.type.toLowerCase().replace(' ', '-')">{{workflow.type}}</span>
+                            <span class="badge ms-2" [ngClass]="workflow.statusClass">
+                                {{workflow.displayStatus || (workflow.newValue || workflow.status)}}
+                            </span>
+                            <!-- Highlight request status changes -->
+                            <span *ngIf="workflow.type === 'Request' && workflow.previousValue && workflow.newValue" 
+                                class="ms-2 fw-bold status-change-indicator">
+                                <i class="fas fa-exchange-alt me-1"></i>
+                                Status Changed
+                            </span>
+                        </h5>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i> {{workflow.displayDate || (workflow.created | date:'MMMM d, yyyy, h:mm a')}}
+                        </small>
+                    </div>
+            </div>
+                <a routerLink="/admin/workflows" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Main details section -->
+            <div class="mb-4">
+                <h6 class="border-bottom pb-2 mb-3">Activity Description</h6>
+                <p>{{workflow.description}}</p>
+                
+                <!-- Enhanced change details for requests -->
+                <div *ngIf="workflow.previousValue && workflow.newValue" 
+                     [ngClass]="{'request-status-change': workflow.type === 'Request', 'change-details': true, 'mt-3': true}">
+                    <h6 class="mb-2">Change Details:</h6>
+                    <div class="d-flex align-items-center">
+                        <span class="change-badge rounded px-3 py-2 me-2">{{workflow.previousValue}}</span>
+                        <i class="fas fa-long-arrow-alt-right mx-3"></i>
+                        <span class="change-badge rounded px-3 py-2" [ngClass]="workflow.statusClass">{{workflow.newValue}}</span>
+                        </div>
+                    
+                    <!-- Special message for request approvals, rejections, or completions -->
+                    <div *ngIf="workflow.type === 'Request'" class="alert mt-3"
+                         [ngClass]="{'alert-success': workflow.newValue.toLowerCase().includes('approved'), 
+                                    'alert-danger': workflow.newValue.toLowerCase().includes('rejected'),
+                                    'alert-info': workflow.newValue.toLowerCase().includes('completed') && !workflow.newValue.toLowerCase().includes('approved')}">
+                        <i class="fas" 
+                           [ngClass]="{'fa-check-circle': workflow.newValue.toLowerCase().includes('approved'),
+                                     'fa-times-circle': workflow.newValue.toLowerCase().includes('rejected'),
+                                     'fa-info-circle': workflow.newValue.toLowerCase().includes('completed') && !workflow.newValue.toLowerCase().includes('approved')}"></i>
+                        <span *ngIf="workflow.newValue.toLowerCase().includes('approved')" class="ms-2">
+                            This request has been <strong>APPROVED</strong>
+                        </span>
+                        <span *ngIf="workflow.newValue.toLowerCase().includes('rejected')" class="ms-2">
+                            This request has been <strong>REJECTED</strong>
+                        </span>
+                        <span *ngIf="workflow.newValue.toLowerCase().includes('completed') && !workflow.newValue.toLowerCase().includes('approved')" class="ms-2">
+                            This request has been <strong>COMPLETED</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Employee information -->
+            <div class="mb-4" *ngIf="workflow.employee">
+                <h6 class="border-bottom pb-2 mb-3">Employee Information</h6>
+                <div class="row">
+                <div class="col-md-6">
+                        <p><strong>Name:</strong> {{workflow.employee?.account?.title}} {{workflow.employee?.account?.firstName}} {{workflow.employee?.account?.lastName}}</p>
+                        <p><strong>Email:</strong> {{workflow.employee?.account?.email}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Department:</strong> {{workflow.employee?.department?.name}}</p>
+                        <p><strong>Position:</strong> {{workflow.employee?.position}}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timestamps -->
+                            <div>
+                <h6 class="border-bottom pb-2 mb-3">Timeline</h6>
+                <div class="d-flex flex-wrap">
+                    <div class="me-4 mb-3">
+                        <small class="text-muted d-block">Created</small>
+                        <span>{{workflow.created | date:'MMM d, yyyy, h:mm a'}}</span>
+                            </div>
+                    <div class="me-4 mb-3" *ngIf="workflow.updated && workflow.updated !== workflow.created">
+                        <small class="text-muted d-block">Last Updated</small>
+                        <span>{{workflow.updated | date:'MMM d, yyyy, h:mm a'}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action buttons -->
+    <div class="mb-4">
+        <!-- Action buttons for pending requests -->
+        <div *ngIf="workflow.type === 'Request' && isPendingRequest(workflow)" class="card mb-3">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Request Actions</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">This request is waiting for action. Please review the details and take appropriate action.</p>
+                
+                <div class="d-flex flex-wrap">
+                    <button (click)="updateRequestStatus('Approved')" class="btn btn-success me-2 mb-2" [disabled]="isProcessing">
+                        <i class="fas fa-check-circle me-1"></i> Approve Request
+                    </button>
+                    <button (click)="updateRequestStatus('Rejected')" class="btn btn-danger me-2 mb-2" [disabled]="isProcessing">
+                        <i class="fas fa-times-circle me-1"></i> Reject Request
+                    </button>
+                    
+                    <!-- Processing indicator -->
+                    <div *ngIf="isProcessing" class="d-flex align-items-center ms-2">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Processing...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <a routerLink="/admin/workflows" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Activities
+        </a>
+    </div>
+</div>
+
+<style>
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.change-badge {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.change-badge.bg-success,
+.change-badge.bg-danger,
+.change-badge.bg-warning,
+.change-badge.bg-info {
+    color: white;
+}
+
+.activity-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: #e9ecef;
+}
+
+.request-status-change {
+    background-color: #fffbde;
+    border-left: 4px solid #ffc107;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.status-change-indicator {
+    color: #fd7e14;
+    font-size: 0.85rem;
+}
+
+/* Specific status colors for request states */
+.change-badge.bg-success {
+    background-color: #198754 !important;
+    color: white;
+}
+
+.change-badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.change-badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.change-badge.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #212529;
+}
+
+/* Type-specific colors */
+.request {
+    background-color: #cff4fc;
+    color: #055160;
+}
+
+.accountcreation, .profileupdate {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.onboarding {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+
+.department-transfer, .transfer {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.status-change, .statusupdate {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.offboarding, .termination {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.departmentcreation {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.departmentupdate {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.departmentdeletion {
+    background-color: #f8d7da;
+    color: #842029;
+}
+</style> 

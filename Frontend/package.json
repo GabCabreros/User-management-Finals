@@ -1,0 +1,39 @@
+{
+  "name": "user-management-system",
+  "version": "1.0.0",
+  "description": "- Backend-authorization-crud\r    - Tester-security-testing\r ### **Shekainah P. Gaceta**\r    - Frontend-signup-auth\r ### **Jun-del S. Patuasic**\r    - Frontend-profile-admin-fake-backend\r    - Backend-signup-auth\r ### **Andrian S. Balberos**\r    - Tester-functional-testing",
+  "main": "index.js",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build --configuration production --base-href / --output-path dist/user-management-system",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [],
+  "author": "Shekainah Gaceta",
+  "license": "ISC",
+  "dependencies": {
+    "@angular/common": "^19.2.6",
+    "@angular/compiler": "^19.2.6",
+    "@angular/core": "^19.2.6",
+    "@angular/forms": "^19.2.6",
+    "@angular/platform-browser": "^19.2.6",
+    "@angular/platform-browser-dynamic": "^19.2.6",
+    "@angular/router": "^19.2.6",
+    "rxjs": "^7.8.2",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.2.7",
+    "@angular/cli": "^19.2.7",
+    "@angular/compiler-cli": "^19.2.6",
+    "angular-eslint": "^19.3.0",
+    "typescript": "^5.8.3"
+  }
+}
